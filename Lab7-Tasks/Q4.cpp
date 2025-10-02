@@ -1,23 +1,23 @@
 #include<iostream>
-#include<vector>
 using namespace std;
-int n;
-vector<bool> col;
-vector<pair<int,int>> dis;
-vector<string> flags;
-vector<string> ans;
-bool can(int i,int j) {
+#define n 4
+
+bool col[n];
+int disx[n] = {1,-1,1,-1}, disy[n] = {1,-1,-1,1};
+char queens[n][n] = {{'.','.','.','.'},{'.','.','.','.'},{'.','.','.','.'},{'.','.','.','.'}};
+
+bool can_place(int i,int j) {
     if(col[j])
         return false;
     for(int t=0;t<4;t++)
     {
-        int dx = dis[t].first;
-        int dy = dis[t].second;
+        int dx = disx[t];
+        int dy = disy[t];
         int x = i + dx;
         int y = j + dy;
         while(x>=0 and y>=0 and x<=n-1 and y<=n-1)
         {
-            if(flags[x][y]=='Q')
+            if(queens[x][y]=='Q')
                 return false; 
             x+=dx;
             y+=dy;
@@ -25,38 +25,35 @@ bool can(int i,int j) {
     }
     return true;
 }
-void recurse(int i=0,int j=0) {
+bool recurse(int i=0,int j=0) {
     if(i==n)
-    {
-        ans = flags;
-        return;
-    }
+        return true;
+
     if(j==n)
-        return;
-    if(can(i,j))
+        return false;
+
+    if(can_place(i,j))
     {
-        flags[i][j] = 'Q';
+        queens[i][j] = 'Q';
         col[j] = true;
-        recurse(i+1,0);
-        flags[i][j] = '.';
+        if(recurse(i+1,0))
+            return true;
+        queens[i][j] = '.';
         col[j] = false;
     }
-    recurse(i,j+1); 
+    if(recurse(i,j+1))
+        return true; 
+
+    return false;
 }
 int main()
 {
-    n = 4;
-    col.assign(10,false);
-    dis = {{1,1},{-1,-1},{1,-1},{-1,1}};
-    string d(n,'.');
-    flags.assign(n,d);
     recurse();
-
-    for(int i=0;i<ans.size();i++)
+    for(int i=0;i<n;i++)
     {
-        for(int j=0;j<ans[i].size();j++)
+        for(int j=0;j<n;j++)
         {
-            cout << ans[i][j]<<" ";
+            cout << queens[i][j]<<" ";
         }
         cout<<endl;
     }
