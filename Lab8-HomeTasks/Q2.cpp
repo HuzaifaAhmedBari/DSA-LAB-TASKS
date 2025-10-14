@@ -71,6 +71,80 @@ class Stack {
         }
 };
 int Transaction::counter = 0;
+int precedence(char op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    return 0;
+}
+
+double applyOp(double a, double b, char op) {
+    switch (op) {
+        case '+': return a + b;
+        case '-': return a - b;
+        case '*': return a * b;
+        case '/': return a / b;
+    }
+    return 0;
+}
+
+string infixToPostfix(string exp) {
+    string output = "";
+    char stack[100];
+    int top = -1;
+
+    for (int i = 0; i < exp.length(); i++) {
+        char c = exp[i];
+        if (c == ' ') continue;
+        if (isdigit(c) || c == '.') {
+            output += c;
+        } else if (c == '(') {
+            stack[++top] = c;
+        } else if (c == ')') {
+            output += ' ';
+            while (top >= 0 && stack[top] != '(') {
+                output += stack[top--];
+                output += ' ';
+            }
+            top--;
+        } else {
+            output += ' ';
+            while (top >= 0 && precedence(stack[top]) >= precedence(c)) {
+                output += stack[top--];
+                output += ' ';
+            }
+            stack[++top] = c;
+        }
+    }
+
+    output += ' ';
+    while (top >= 0) {
+        output += stack[top--];
+        output += ' ';
+    }
+
+    return output;
+}
+
+double evaluatePostfix(string postfix) {
+    double stack[100];
+    int top = -1;
+    string num = "";
+
+    for (int i = 0; i < postfix.length(); i++) {
+        char c = postfix[i];
+        if (isdigit(c) || c == '.') {
+            num += c;
+        } else if (c == ' ' && !num.empty()) {
+            stack[++top] = stod(num);
+            num = "";
+        } else if (c == '+' || c == '-' || c == '*' || c == '/') {
+            double b = stack[top--];
+            double a = stack[top--];
+            stack[++top] = applyOp(a, b, c);
+        }
+    }
+    return stack[top];
+}
 int main()
 {
     srand(time(0));
@@ -89,5 +163,9 @@ int main()
         cout<<endl;
     }
     cout << "BOTTOM" << endl;
+
+    string infix = "(100 + 20) * 0.9 - 5";
+    string postfix = infixToPostfix(infix);
+    cout<<evaluatePostfix(postfix)<<endl;
 
 }
